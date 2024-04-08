@@ -1,0 +1,5 @@
+{
+  "namespace": "itemOwnedIndicators",
+  "icon": "assets/itemOwnedIndicators/Logo.png",
+  "setup": "setup.mjs"
+}
