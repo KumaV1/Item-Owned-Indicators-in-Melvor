@@ -1,10 +1,18 @@
 import '../assets/itemOwnedIndicators/Logo.png'
+import { BankUiHelper } from './helpers/BankUiHelper';
 import { CombatLootUiHelper } from './helpers/CombatLootUiHelper';
-import { ItemStoreQuantities } from './models/QuantityData';
+import { ItemStorages } from './models/ItemStorages';
 
 export async function setup(ctx: Modding.ModContext) {
     patchTooltilCreation();
+    patchBankUi(ctx);
     patchCombatLootContainerRenderIndicators(ctx);
+}
+
+function patchBankUi(ctx: Modding.ModContext) {
+    ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
+        BankUiHelper.render(bankItem.item, this.selectedItemContainer);
+    });
 }
 
 /**
@@ -21,10 +29,10 @@ function patchTooltilCreation() {
             return originalResult;
         }
 
-        var quantities = new ItemStoreQuantities(item);
-        return CombatLootUiHelper.createBadge(getLangString('PAGE_NAME_Bank'), quantities.bank)
-            + CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), quantities.equipment)
-            + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), quantities.cookingStockpiles)
+        var storages = new ItemStorages(item);
+        return CombatLootUiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
+            + CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+            + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
             + originalResult;
     }
 
@@ -32,7 +40,7 @@ function patchTooltilCreation() {
 }
 
 /**
- * Patch some methods that causes item stores to change,
+ * Patch some methods that causes item storages to change,
  * but may not cause the loot container to re-render
  */
 function patchCombatLootContainerRenderIndicators(ctx: Modding.ModContext) {
