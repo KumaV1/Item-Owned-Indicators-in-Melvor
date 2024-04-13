@@ -1,20 +1,14 @@
 import '../assets/itemOwnedIndicators/Logo.png'
 import { BankUiHelper } from './helpers/BankUiHelper';
 import { CombatLootUiHelper } from './helpers/CombatLootUiHelper';
-import { TranslationManager } from './managers/TranslationManager';
 import { ItemStorages } from './models/ItemStorages';
+import { TranslationManager } from './managers/TranslationManager';
 
 export async function setup(ctx: Modding.ModContext) {
     initTranslations();
-    patchTooltilCreation();
     patchBankUi(ctx);
-    patchCombatLootContainerRenderIndicators(ctx);
-}
-
-function patchBankUi(ctx: Modding.ModContext) {
-    ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
-        BankUiHelper.render(bankItem.item, this.selectedItemContainer);
-    });
+    patchCombatLootUi(ctx);
+    patchRenderIndicators(ctx);
 }
 
 /**
@@ -24,35 +18,37 @@ function initTranslations() {
     TranslationManager.register();
 }
 
+function patchBankUi(ctx: Modding.ModContext) {
+    ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
+        BankUiHelper.render(bankItem.item, this.selectedItemContainer);
+    });
+}
+
 /**
  * Patch build of item tooltip, to include indicators of how many you own
  */
-function patchTooltilCreation() {
-    const originalFunc = createItemInformationTooltip;
+function patchCombatLootUi(ctx: Modding.ModContext) {
+    ctx.patch(CombatLootMenuElement, 'renderDrops').after(function (returnValue: void, drops: AnyItemQuantity[], maxDrops: number, loot: CombatLoot) {
+        // Go through each loot element just created, and prefix tooltip content with more info
+        this.dropElements.forEach((dropElement, i) => {
+            const drop = drops[i];
 
-    const newFunc = function (item: AnyItem, showStats?: boolean | undefined): string {
-        const originalResult = originalFunc(item, showStats);
+            var storages = new ItemStorages(drop.item);
+            const additionalContent =
+                CombatLootUiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
+                + CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+                + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles);
 
-        // Current (?8596) indicator, that we are in the combat loot container
-        if (!showStats) {
-            return originalResult;
-        }
-
-        var storages = new ItemStorages(item);
-        return CombatLootUiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
-            + CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
-            + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
-            + originalResult;
-    }
-
-    window.createItemInformationTooltip = newFunc;
+            dropElement.tooltip.setContent(additionalContent + dropElement.tooltip.props.content);
+        });
+    });
 }
 
 /**
  * Patch some methods that causes item storages to change,
  * but may not cause the loot container to re-render
  */
-function patchCombatLootContainerRenderIndicators(ctx: Modding.ModContext) {
+function patchRenderIndicators(ctx: Modding.ModContext) {
     // On adding/removing items from the bank in any way
     ctx.patch(Bank, 'addItem').after(function () {
         ensureRerenders();
