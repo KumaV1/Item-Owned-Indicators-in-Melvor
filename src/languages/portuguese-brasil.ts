@@ -1,5 +1,5 @@
 ﻿export const ptBR = {
-    General_Loot: "Loot",
+    General_Loot: "Saque",
 
-    Bank_Selected_Item_Section_Title: "Other containers"
+    Bank_Selected_Item_Section_Title: "Outros armazenamentos"
 };

@@ -1,5 +1,5 @@
 ﻿export const ko = {
-    General_Loot: "Loot",
+    General_Loot: "전리품",
 
-    Bank_Selected_Item_Section_Title: "Other containers"
+    Bank_Selected_Item_Section_Title: "기타 저장소"
 };

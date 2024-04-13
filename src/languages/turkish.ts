@@ -1,5 +1,5 @@
 ﻿export const tr = {
-    General_Loot: "Loot",
+    General_Loot: "Yağma",
 
-    Bank_Selected_Item_Section_Title: "Other containers"
+    Bank_Selected_Item_Section_Title: "Diğer depolar"
 };

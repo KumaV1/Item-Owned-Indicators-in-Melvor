@@ -1,5 +1,5 @@
 ﻿export const ru = {
-    General_Loot: "Loot",
+    General_Loot: "Лут",
 
-    Bank_Selected_Item_Section_Title: "Other containers"
+    Bank_Selected_Item_Section_Title: "Другие хранилища"
 };

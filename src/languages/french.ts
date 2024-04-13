@@ -1,5 +1,5 @@
 ﻿export const fr = {
-    General_Loot: "Loot",
+    General_Loot: "Butin",
 
-    Bank_Selected_Item_Section_Title: "Other containers"
+    Bank_Selected_Item_Section_Title: "Autres stockages"
 };

@@ -1,5 +1,5 @@
 ﻿export const zhCN = {
-    General_Loot: "Loot",
+    General_Loot: "战利品",
 
-    Bank_Selected_Item_Section_Title: "Other containers"
+    Bank_Selected_Item_Section_Title: "其他仓库"
 };
