@@ -1,9 +1,11 @@
 import '../assets/itemOwnedIndicators/Logo.png'
 import { BankUiHelper } from './helpers/BankUiHelper';
 import { CombatLootUiHelper } from './helpers/CombatLootUiHelper';
+import { TranslationManager } from './managers/TranslationManager';
 import { ItemStorages } from './models/ItemStorages';
 
 export async function setup(ctx: Modding.ModContext) {
+    initTranslations();
     patchTooltilCreation();
     patchBankUi(ctx);
     patchCombatLootContainerRenderIndicators(ctx);
@@ -13,6 +15,13 @@ function patchBankUi(ctx: Modding.ModContext) {
     ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
         BankUiHelper.render(bankItem.item, this.selectedItemContainer);
     });
+}
+
+/**
+ * Initialize custom translations
+ */
+function initTranslations() {
+    TranslationManager.register();
 }
 
 /**

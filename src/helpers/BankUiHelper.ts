@@ -1,3 +1,4 @@
+import { Constants } from "../Constants";
 import { ItemStorages } from "../models/ItemStorages";
 import { ItemStoragesCreationPerformanceConfig } from "../models/ItemStoragesCreationPerformanceConfig";
 
@@ -41,7 +42,7 @@ export class BankUiHelper {
 
         BankUiHelper._storagesSectionContainer.innerHTML = `<div class="block block-rounded-double bg-combat-inner-dark">
                        <div class="block-header block-header-default bg-dark-bank-block-header px-3 py-1">
-                           <h5 class="font-size-sm font-w600 mb-0">SECTION TITLE HERE</h5>
+                           <h5 class="font-size-sm font-w600 mb-0">${getLangString(`${Constants.MOD_NAMESPACE}_Bank_Selected_Item_Section_Title`)}</h5>
                        </div>
                        <div class="col-12">
                            ${BankUiHelper.buildStoragesInfo(storages)}
@@ -69,7 +70,7 @@ export class BankUiHelper {
     private static buildStoragesInfo(storages: ItemStorages) {
         return BankUiHelper.buildStorageInfo(getLangString('COMBAT_MISC_110'), storages.equipment)
             + BankUiHelper.buildStorageInfo(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
-            + BankUiHelper.buildStorageInfo("Loot", storages.lootContainer);
+            + BankUiHelper.buildStorageInfo(getLangString(`${Constants.MOD_NAMESPACE}_General_Loot`), storages.lootContainer);
     }
 
     /**
