@@ -1,10 +1,27 @@
 import '../assets/itemOwnedIndicators/Logo.png'
+import { BankUiHelper } from './helpers/BankUiHelper';
 import { CombatLootUiHelper } from './helpers/CombatLootUiHelper';
-import { ItemStoreQuantities } from './models/QuantityData';
+import { TranslationManager } from './managers/TranslationManager';
+import { ItemStorages } from './models/ItemStorages';
 
 export async function setup(ctx: Modding.ModContext) {
+    initTranslations();
     patchTooltilCreation();
+    patchBankUi(ctx);
     patchCombatLootContainerRenderIndicators(ctx);
+}
+
+function patchBankUi(ctx: Modding.ModContext) {
+    ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
+        BankUiHelper.render(bankItem.item, this.selectedItemContainer);
+    });
+}
+
+/**
+ * Initialize custom translations
+ */
+function initTranslations() {
+    TranslationManager.register();
 }
 
 /**
@@ -21,10 +38,10 @@ function patchTooltilCreation() {
             return originalResult;
         }
 
-        var quantities = new ItemStoreQuantities(item);
-        return CombatLootUiHelper.createBadge(getLangString('PAGE_NAME_Bank'), quantities.bank)
-            + CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), quantities.equipment)
-            + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), quantities.cookingStockpiles)
+        var storages = new ItemStorages(item);
+        return CombatLootUiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
+            + CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+            + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
             + originalResult;
     }
 
@@ -32,38 +49,46 @@ function patchTooltilCreation() {
 }
 
 /**
- * Patch some methods that causes item stores to change,
+ * Patch some methods that causes item storages to change,
  * but may not cause the loot container to re-render
  */
 function patchCombatLootContainerRenderIndicators(ctx: Modding.ModContext) {
     // On adding/removing items from the bank in any way
     ctx.patch(Bank, 'addItem').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
     ctx.patch(Bank, 'removeItemQuantity').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
 
     // On any changes to equipment/food (some would technically be handled by Bank changes, but better be safe than sorry)
     ctx.patch(Equipment, 'equipItem').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
     ctx.patch(Equipment, 'unequipItem').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
 
     ctx.patch(EquippedFood, 'equip').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
     ctx.patch(EquippedFood, 'unequipSelected').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
     ctx.patch(EquippedFood, 'consume').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
 
     // On passive cooking action (claiming stockpile adds to bank and is therefore already handled by above patch)
     ctx.patch(Cooking, 'passiveCookingAction').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
+}
+
+/**
+ * Goes through all indicators, to make sure that re-renders are made, if necessary
+ */
+function ensureRerenders() {
+    game.combat.loot.renderRequired = true;
+    BankUiHelper.rerenderSelectedItemContainerIfRequired();
 }
