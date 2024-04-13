@@ -1,11 +1,16 @@
 import { Constants } from "../Constants";
 import { ItemStorages } from "../models/ItemStorages";
 import { ItemStoragesCreationPerformanceConfig } from "../models/ItemStoragesCreationPerformanceConfig";
+import { IoiUtils } from "../utils";
 
 /**
  * Helper for adjustments of the bank's ui
  */
 export class BankUiHelper {
+    /** A container around the selected item sidebar area, whose height we may have to manipulate */
+    private static _bankItemBoxContainer: HTMLElement | null;
+
+    /** The container with the information about storages */
     private static _storagesSectionContainer: HTMLDivElement | undefined;
 
     /**
@@ -18,13 +23,27 @@ export class BankUiHelper {
         // Set id on container, if it wasn't already
         if (BankUiHelper._storagesSectionContainer === undefined) {
             // Create element
-            BankUiHelper._storagesSectionContainer = document.createElement("div");
-            BankUiHelper._storagesSectionContainer.id = "item-owned-indicators__bank-ui-storages-section";
-            BankUiHelper._storagesSectionContainer.classList.add("col-12");
-            BankUiHelper._storagesSectionContainer.classList.add("item-owned-indicators__bank-ui-storages-section");
+            BankUiHelper._storagesSectionContainer = createElement('div', {
+                id: 'item-owned-indicators__bank-ui-storages-section',
+                classList: ['col-12', 'item-owned-indicators__bank-ui-storages-section'],
+                parent: parentContainer
+            });
+        }
+        if (!BankUiHelper._bankItemBoxContainer) {
+            BankUiHelper._bankItemBoxContainer = document.getElementById('bank-item-box');
+        }
 
-            // Place it b
-            parentContainer.appendChild(BankUiHelper._storagesSectionContainer)
+        BankUiHelper.renderInternal(item);
+    }
+
+    /**
+     * Process rendering the storages section in the bank's selected item info
+     * @param item the item to render
+     * @returns
+     */
+    private static renderInternal(item: AnyItem): void {
+        if (!BankUiHelper._storagesSectionContainer) {
+            return;
         }
 
         // Set up config for performance
@@ -35,12 +54,9 @@ export class BankUiHelper {
         const storages = new ItemStorages(item);
 
         // Run how to render container
-        if (!BankUiHelper.showSection(storages)) {
-            hideElement(BankUiHelper._storagesSectionContainer);
-            return;
-        }
-
-        BankUiHelper._storagesSectionContainer.innerHTML = `<div class="block block-rounded-double bg-combat-inner-dark">
+        if (BankUiHelper.showSection(storages)) {
+            // Set content of container
+            BankUiHelper._storagesSectionContainer.innerHTML = `<div class="block block-rounded-double bg-combat-inner-dark">
                        <div class="block-header block-header-default bg-dark-bank-block-header px-3 py-1">
                            <h5 class="font-size-sm font-w600 mb-0">${getLangString(`${Constants.MOD_NAMESPACE}_Bank_Selected_Item_Section_Title`)}</h5>
                        </div>
@@ -48,7 +64,48 @@ export class BankUiHelper {
                            ${BankUiHelper.buildStoragesInfo(storages)}
                        </div>
                    </div>`;
-        showElement(BankUiHelper._storagesSectionContainer);
+
+            // Show container
+            showElement(BankUiHelper._storagesSectionContainer);
+        } else {
+            hideElement(BankUiHelper._storagesSectionContainer);
+        }
+
+        BankUiHelper.evaluateCustomElementHeights();
+    }
+
+    /**
+     * Adjust static heights if necessary
+     */
+    private static evaluateCustomElementHeights(): void {
+        if (BankUiHelper._bankItemBoxContainer) {
+            IoiUtils.removeCustomElementHeight(BankUiHelper._bankItemBoxContainer);
+
+            if (BankUiHelper._bankItemBoxContainer.offsetHeight < bankSideBarMenu.offsetHeight) {
+                IoiUtils.setCustomElementHeight(BankUiHelper._bankItemBoxContainer, bankSideBarMenu.offsetHeight);
+            }
+        }
+    }
+
+    /**
+     * If necessary, re-renders the selected item container, so it's updated with newest changes
+     * @returns
+     */
+    public static rerenderSelectedItemContainerIfRequired(): void {
+        // No item currently selected
+        if (!game.bank.selectedBankItem) {
+            return;
+        }
+
+        // Not shown, so would update on show anyway (due to patches)
+        if (IoiUtils.elementIsHidden(bankSideBarMenu.selectedMenu.selectedItemContainer)) {
+            return;
+        }
+
+        // Otherwise, rerender
+        // NOTE: only calling`renderInternal`(only rerendering the new container) resulted in certain height changes not being picked up properly by what the method currently does
+        bankSideBarMenu.selectedMenu.setItem(game.bank.selectedBankItem, game.bank);
+        return;
     }
 
     /**
@@ -83,8 +140,8 @@ export class BankUiHelper {
             return '';
         }
 
-        return `<div class="mt-2 mb-2 mr-2">
-          <span class="item-owned-indicators__bank-ui-storages-section-storage-name">${name}:</span><span class="class="item-owned-indicators__bank-ui-storages-section-storage-amount">${formatNumber(qty)}<span></span>
+        return `<div class="mt-2 mb-2">
+          <span class="mr-1 item-owned-indicators__bank-ui-storages-section-storage-name">${name}:</span><span class="class="item-owned-indicators__bank-ui-storages-section-storage-amount">${formatNumber(qty)}<span></span>
         </div>`
     }
 }

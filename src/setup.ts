@@ -55,32 +55,40 @@ function patchTooltilCreation() {
 function patchCombatLootContainerRenderIndicators(ctx: Modding.ModContext) {
     // On adding/removing items from the bank in any way
     ctx.patch(Bank, 'addItem').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
     ctx.patch(Bank, 'removeItemQuantity').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
 
     // On any changes to equipment/food (some would technically be handled by Bank changes, but better be safe than sorry)
     ctx.patch(Equipment, 'equipItem').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
     ctx.patch(Equipment, 'unequipItem').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
 
     ctx.patch(EquippedFood, 'equip').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
     ctx.patch(EquippedFood, 'unequipSelected').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
     ctx.patch(EquippedFood, 'consume').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
 
     // On passive cooking action (claiming stockpile adds to bank and is therefore already handled by above patch)
     ctx.patch(Cooking, 'passiveCookingAction').after(function () {
-        game.combat.loot.renderRequired = true;
+        ensureRerenders();
     });
+}
+
+/**
+ * Goes through all indicators, to make sure that re-renders are made, if necessary
+ */
+function ensureRerenders() {
+    game.combat.loot.renderRequired = true;
+    BankUiHelper.rerenderSelectedItemContainerIfRequired();
 }
