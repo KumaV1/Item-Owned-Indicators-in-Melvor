@@ -20,7 +20,7 @@ export class BankUiHelper {
      * @returns
      */
     public static render(item: AnyItem, parentContainer: HTMLDivElement): void {
-        // Set id on container, if it wasn't already
+        // Initialize / Preserve containers, if they haven't been already
         if (BankUiHelper._storagesSectionContainer === undefined) {
             // Create element
             BankUiHelper._storagesSectionContainer = createElement('div', {
@@ -75,7 +75,9 @@ export class BankUiHelper {
     }
 
     /**
-     * Adjust static heights if necessary
+     * Adjust static heights if necessary,
+     * as certain elements in the sidebar may have static height,
+     * which can end up being exceeded due to the new section
      */
     private static evaluateCustomElementHeights(): void {
         if (BankUiHelper._bankItemBoxContainer) {
@@ -97,7 +99,7 @@ export class BankUiHelper {
             return;
         }
 
-        // Not shown, so would update on show anyway (due to patches)
+        // Not shown, so would update on show anyway (due to mod's method patches)
         if (IoiUtils.elementIsHidden(bankSideBarMenu.selectedMenu.selectedItemContainer)) {
             return;
         }
