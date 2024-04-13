@@ -1,5 +1,5 @@
 ﻿export const de = {
-    General_Loot: "Beute",
+    Storage_Name_Combat_Loot: "Beute",
 
     Bank_Selected_Item_Section_Title: "Andere Lagerungen"
 };

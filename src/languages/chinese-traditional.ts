@@ -1,5 +1,5 @@
 ﻿export const zhTW = {
-    General_Loot: "搶劫",
+    Storage_Name_Combat_Loot: "搶劫",
 
     Bank_Selected_Item_Section_Title: "其他儲存"
 };
