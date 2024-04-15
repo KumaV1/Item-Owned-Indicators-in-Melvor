@@ -1,7 +1,9 @@
 import '../assets/itemOwnedIndicators/Logo.png'
 import { BankUiHelper } from './helpers/BankUiHelper';
 import { CombatLootUiHelper } from './helpers/CombatLootUiHelper';
+import { Constants } from './Constants';
 import { ItemStorages } from './models/ItemStorages';
+import { ItemStoragesCreationPerformanceConfig } from './models/ItemStoragesCreationPerformanceConfig';
 import { TranslationManager } from './managers/TranslationManager';
 
 export async function setup(ctx: Modding.ModContext) {
@@ -22,6 +24,32 @@ function patchBankUi(ctx: Modding.ModContext) {
     ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
         BankUiHelper.render(bankItem.item, this.selectedItemContainer);
     });
+
+    ctx.patch(BankItemIcon, 'setItem').after(function (returnValue: void, bank: Bank, bankItem: BankItem) {
+
+        const oldFunc = this.tooltip.props.onShow;
+        this.tooltip.props.onShow = (instance: TippyTooltip) => {
+            if (this.item !== undefined) {
+                // Run originally defined logic first
+                oldFunc(instance);
+
+                // Set up config for performance
+                let config = new ItemStoragesCreationPerformanceConfig();
+                config.disableBank = true;
+
+                // Get storages
+                var storages = new ItemStorages(this.item);
+
+                // Build and set
+                const additionalContent =
+                    CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+                    + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
+                    + CombatLootUiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
+
+                instance.setContent(additionalContent + instance.props.content);
+            }
+        }
+    });
 }
 
 /**
@@ -33,7 +61,14 @@ function patchCombatLootUi(ctx: Modding.ModContext) {
         this.dropElements.forEach((dropElement, i) => {
             const drop = drops[i];
 
+            // Set up config for performance
+            let config = new ItemStoragesCreationPerformanceConfig();
+            config.disableLootContainer = true;
+
+            // Get storages
             var storages = new ItemStorages(drop.item);
+
+            // Build and set
             const additionalContent =
                 CombatLootUiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
                 + CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
