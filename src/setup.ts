@@ -3,6 +3,7 @@ import { BankUiHelper } from './helpers/BankUiHelper';
 import { Constants } from './Constants';
 import { ItemStorages } from './models/ItemStorages';
 import { ItemStoragesCreationPerformanceConfig } from './models/ItemStoragesCreationPerformanceConfig';
+import { TownshipUiHelper } from './helpers/TownshipUiHelper';
 import { TranslationManager } from './managers/TranslationManager';
 import { UiHelper } from './helpers/UiHelper';
 
@@ -10,6 +11,7 @@ export async function setup(ctx: Modding.ModContext) {
     initTranslations();
     patchBankUi(ctx);
     patchCookingUi(ctx);
+    patchTownshipUi(ctx);
     patchCombatLootUi(ctx);
     patchRenderIndicators(ctx);
 }
@@ -41,8 +43,7 @@ function patchBankUi(ctx: Modding.ModContext) {
                 var storages = new ItemStorages(this.item, config);
 
                 // Build and set
-                const additionalContent =
-                    UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+                const additionalContent = UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
                     + UiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
                     + UiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
 
@@ -61,10 +62,28 @@ function patchCookingUi(ctx: Modding.ModContext) {
         // Get storages
         var storages = new ItemStorages(this.item);
 
+        // Build and set
         return UiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
-                + UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
-                + UiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer)
-                + returnValue;
+            + UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+            + UiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer)
+            + returnValue;
+    });
+}
+
+function patchTownshipUi(ctx: Modding.ModContext) {
+    ctx.patch(TownshipConversionElement, 'getTooltip').after(function (returnValue: string, resource: TownshipResource, conversion: TownshipItemConversion): string {
+        // Set up config for performance
+        let config = new ItemStoragesCreationPerformanceConfig();
+        config.disableBank = true; // the original tooltip already takes care of it
+
+        // Get storages
+        var storages = new ItemStorages(conversion.item, config);
+
+        // Build and set
+        return returnValue
+            + TownshipUiHelper.createConversionTooltipInfo(getLangString('COMBAT_MISC_110'), storages.equipment)
+            + TownshipUiHelper.createConversionTooltipInfo(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
+            + TownshipUiHelper.createConversionTooltipInfo(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
     });
 }
 

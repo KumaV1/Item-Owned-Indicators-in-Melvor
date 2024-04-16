@@ -1,5 +1,5 @@
 /**
- * Helper for adjustments of the Combat loot's ui
+ * Helper for general ui adjustments/builds
  */
 export class UiHelper {
     public static createBadge(prefix: string, qty: number): string {
