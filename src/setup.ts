@@ -1,14 +1,17 @@
 import '../assets/itemOwnedIndicators/Logo.png'
 import { BankUiHelper } from './helpers/BankUiHelper';
-import { CombatLootUiHelper } from './helpers/CombatLootUiHelper';
 import { Constants } from './Constants';
 import { ItemStorages } from './models/ItemStorages';
 import { ItemStoragesCreationPerformanceConfig } from './models/ItemStoragesCreationPerformanceConfig';
+import { TownshipUiHelper } from './helpers/TownshipUiHelper';
 import { TranslationManager } from './managers/TranslationManager';
+import { UiHelper } from './helpers/UiHelper';
 
 export async function setup(ctx: Modding.ModContext) {
     initTranslations();
     patchBankUi(ctx);
+    patchCookingUi(ctx);
+    patchTownshipUi(ctx);
     patchCombatLootUi(ctx);
     patchRenderIndicators(ctx);
 }
@@ -26,7 +29,6 @@ function patchBankUi(ctx: Modding.ModContext) {
     });
 
     ctx.patch(BankItemIcon, 'setItem').after(function (returnValue: void, bank: Bank, bankItem: BankItem) {
-
         const oldFunc = this.tooltip.props.onShow;
         this.tooltip.props.onShow = (instance: TippyTooltip) => {
             if (this.item !== undefined) {
@@ -38,17 +40,50 @@ function patchBankUi(ctx: Modding.ModContext) {
                 config.disableBank = true;
 
                 // Get storages
-                var storages = new ItemStorages(this.item);
+                var storages = new ItemStorages(this.item, config);
 
                 // Build and set
-                const additionalContent =
-                    CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
-                    + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
-                    + CombatLootUiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
+                const additionalContent = UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+                    + UiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
+                    + UiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
 
                 instance.setContent(additionalContent + instance.props.content);
             }
         }
+    });
+}
+
+function patchCookingUi(ctx: Modding.ModContext) {
+    ctx.patch(CookingStockpileIcon, 'getTooltipContent').after(function (returnValue: string): string {
+        if (this.item === undefined) {
+            return returnValue;
+        }
+
+        // Get storages
+        var storages = new ItemStorages(this.item);
+
+        // Build and set
+        return UiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
+            + UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+            + UiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer)
+            + returnValue;
+    });
+}
+
+function patchTownshipUi(ctx: Modding.ModContext) {
+    ctx.patch(TownshipConversionElement, 'getTooltip').after(function (returnValue: string, resource: TownshipResource, conversion: TownshipItemConversion): string {
+        // Set up config for performance
+        let config = new ItemStoragesCreationPerformanceConfig();
+        config.disableBank = true; // the original tooltip already takes care of it
+
+        // Get storages
+        var storages = new ItemStorages(conversion.item, config);
+
+        // Build and set
+        return returnValue
+            + TownshipUiHelper.createConversionTooltipInfo(getLangString('COMBAT_MISC_110'), storages.equipment)
+            + TownshipUiHelper.createConversionTooltipInfo(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
+            + TownshipUiHelper.createConversionTooltipInfo(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
     });
 }
 
@@ -66,13 +101,13 @@ function patchCombatLootUi(ctx: Modding.ModContext) {
             config.disableLootContainer = true;
 
             // Get storages
-            var storages = new ItemStorages(drop.item);
+            var storages = new ItemStorages(drop.item, config);
 
             // Build and set
             const additionalContent =
-                CombatLootUiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
-                + CombatLootUiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
-                + CombatLootUiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles);
+                UiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
+                + UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
+                + UiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles);
 
             dropElement.tooltip.setContent(additionalContent + dropElement.tooltip.props.content);
         });
