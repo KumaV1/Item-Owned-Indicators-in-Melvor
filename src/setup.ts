@@ -69,13 +69,6 @@ function patchBankUi(ctx: Modding.ModContext) {
         });
 
         // At this point the bank already rendered, so we have to re-render it for the patched version to be rendered
-        //game.bank.items.forEach(function (value: BankItem, key: AnyItem) {
-        //    bankTabMenu.itemIcons.forEach((value: BankItemIcon, key: AnyItem) => {
-        //        value.setItem(game.bank);
-        //    });
-        //});
-
-        // At this point the bank already rendered, so we have to re-render it for the patched version to be rendered
         game.bank.itemsByTab.forEach((tab: BankItem[], tabID: Number) => {
             tab.forEach((bankItem: BankItem) => {
                 const itemIcon: BankItemIcon | undefined = bankTabMenu.itemIcons.get(bankItem.item);
