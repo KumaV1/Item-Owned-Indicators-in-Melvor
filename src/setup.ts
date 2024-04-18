@@ -6,14 +6,20 @@ import { ItemStoragesCreationPerformanceConfig } from './models/ItemStoragesCrea
 import { TownshipUiHelper } from './helpers/TownshipUiHelper';
 import { TranslationManager } from './managers/TranslationManager';
 import { UiHelper } from './helpers/UiHelper';
+import { SettingsManager } from './managers/SettingsManager';
+import { DisplayAreaOption } from './models/DisplayAreaOption';
 
 export async function setup(ctx: Modding.ModContext) {
     initTranslations();
-    patchBankUi(ctx);
-    patchCookingUi(ctx);
-    patchTownshipUi(ctx);
-    patchCombatLootUi(ctx);
-    patchRenderIndicators(ctx);
+    initSettings(ctx);
+
+    ctx.onCharacterLoaded(function () {
+        patchBankUi(ctx);
+        patchCookingUi(ctx);
+        patchTownshipUi(ctx);
+        patchCombatLootUi(ctx);
+        patchRenderIndicators(ctx);
+    });
 }
 
 /**
@@ -23,95 +29,141 @@ function initTranslations() {
     TranslationManager.register();
 }
 
+/**
+ * Initialize settings
+ */
+function initSettings(ctx: Modding.ModContext) {
+    SettingsManager.init(ctx);
+}
+
 function patchBankUi(ctx: Modding.ModContext) {
-    ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
-        BankUiHelper.render(bankItem.item, this.selectedItemContainer);
-    });
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.BankItemSelected)) {
+        ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
+            BankUiHelper.render(bankItem.item, this.selectedItemContainer);
+        });
+    }
 
-    ctx.patch(BankItemIcon, 'setItem').after(function (returnValue: void, bank: Bank, bankItem: BankItem) {
-        const oldFunc = this.tooltip.props.onShow;
-        this.tooltip.props.onShow = (instance: TippyTooltip) => {
-            if (this.item !== undefined) {
-                // Run originally defined logic first
-                oldFunc(instance);
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.BankItemHover)) {
+        ctx.patch(BankItemIcon, 'setItem').after(function (returnValue: void, bank: Bank, bankItem: BankItem) {
+            const oldFunc = this.tooltip.props.onShow;
+            this.tooltip.props.onShow = (instance: TippyTooltip) => {
+                if (this.item !== undefined) {
+                    // Run originally defined logic first
+                    oldFunc(instance);
 
-                // Set up config for performance
-                let config = new ItemStoragesCreationPerformanceConfig();
-                config.disableBank = true;
+                    // Set up config for performance
+                    let config = new ItemStoragesCreationPerformanceConfig();
+                    config.disableBank = true;
 
-                // Get storages
-                var storages = new ItemStorages(this.item, config);
+                    // Get storages
+                    var storages = new ItemStorages(this.item, config);
 
-                // Build and set
-                const additionalContent = UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
-                    + UiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
-                    + UiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
+                    // Build and set
+                    const additionalContent = UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
+                        + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COOKING_STOCKPILES), storages.cookingStockpiles)
+                        + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer);
 
-                instance.setContent(additionalContent + instance.props.content);
+                    instance.setContent(additionalContent + instance.props.content);
+                }
             }
-        }
-    });
+        });
+
+        // At this point the bank already rendered, so we have to re-render it for the patched version to be rendered
+        game.bank.itemsByTab.forEach((tab: BankItem[], tabID: Number) => {
+            tab.forEach((bankItem: BankItem) => {
+                const itemIcon: BankItemIcon | undefined = bankTabMenu.itemIcons.get(bankItem.item);
+                if (itemIcon !== undefined) {
+                    itemIcon.setItem(game.bank, bankItem);
+                }
+            })
+        });
+
+        //game.bank.items.forEach((value: BankItem, key))
+
+        console.log(`Bankshould have re-rendered`);
+    }
 }
 
 function patchCookingUi(ctx: Modding.ModContext) {
-    ctx.patch(CookingStockpileIcon, 'getTooltipContent').after(function (returnValue: string): string {
-        if (this.item === undefined) {
-            return returnValue;
-        }
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.CookingStockpiles)) {
+        ctx.patch(CookingStockpileIcon, 'getTooltipContent').after(function (returnValue: string): string {
+            if (this.item === undefined) {
+                return returnValue;
+            }
 
-        // Get storages
-        var storages = new ItemStorages(this.item);
+            // Get storages
+            var storages = new ItemStorages(this.item);
 
-        // Build and set
-        return UiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
-            + UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
-            + UiHelper.createBadge(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer)
-            + returnValue;
-    });
+            // Build and set
+            return UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.BANK), storages.bank)
+                + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
+                + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer)
+                + returnValue;
+        });
+    }
 }
 
 function patchTownshipUi(ctx: Modding.ModContext) {
-    ctx.patch(TownshipConversionElement, 'getTooltip').after(function (returnValue: string, resource: TownshipResource, conversion: TownshipItemConversion): string {
-        // Set up config for performance
-        let config = new ItemStoragesCreationPerformanceConfig();
-        config.disableBank = true; // the original tooltip already takes care of it
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.TownshipTraderConversions)) {
+        ctx.patch(TownshipConversionElement, 'getTooltip').after(function (returnValue: string, resource: TownshipResource, conversion: TownshipItemConversion): string {
+            // Set up config for performance
+            let config = new ItemStoragesCreationPerformanceConfig();
+            config.disableBank = true; // the original tooltip already takes care of it
 
-        // Get storages
-        var storages = new ItemStorages(conversion.item, config);
+            // Get storages
+            var storages = new ItemStorages(conversion.item, config);
 
-        // Build and set
-        return returnValue
-            + TownshipUiHelper.createConversionTooltipInfo(getLangString('COMBAT_MISC_110'), storages.equipment)
-            + TownshipUiHelper.createConversionTooltipInfo(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
-            + TownshipUiHelper.createConversionTooltipInfo(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
-    });
+            // Build and set
+            return returnValue
+                + TownshipUiHelper.createConversionTooltipInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
+                + TownshipUiHelper.createConversionTooltipInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COOKING_STOCKPILES), storages.cookingStockpiles)
+                + TownshipUiHelper.createConversionTooltipInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer);
+        });
+    }
 }
 
 /**
  * Patch build of item tooltip, to include indicators of how many you own
  */
 function patchCombatLootUi(ctx: Modding.ModContext) {
-    ctx.patch(CombatLootMenuElement, 'renderDrops').after(function (returnValue: void, drops: AnyItemQuantity[], maxDrops: number, loot: CombatLoot) {
-        // Go through each loot element just created, and prefix tooltip content with more info
-        this.dropElements.forEach((dropElement, i) => {
-            const drop = drops[i];
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.CombatLootContainer)) {
+        ctx.patch(CombatLootMenuElement, 'renderDrops').after(function (returnValue: void, drops: AnyItemQuantity[], maxDrops: number, loot: CombatLoot) {
+            // Go through each loot element just created, and prefix tooltip content with more info
+            if (this.dropElements.length < 1) {
+                return;
+            }
 
-            // Set up config for performance
-            let config = new ItemStoragesCreationPerformanceConfig();
-            config.disableLootContainer = true;
+            for (var i = 0; i < this.dropElements.length; i++) {
+                const dropElement = this.dropElements[i];
+                if (!dropElement) {
+                    continue;
+                }
 
-            // Get storages
-            var storages = new ItemStorages(drop.item, config);
+                const drop = drops[i];
+                if (!drop) {
+                    continue;
+                }
 
-            // Build and set
-            const additionalContent =
-                UiHelper.createBadge(getLangString('PAGE_NAME_Bank'), storages.bank)
-                + UiHelper.createBadge(getLangString('COMBAT_MISC_110'), storages.equipment)
-                + UiHelper.createBadge(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles);
+                // Set up config for performance
+                let config = new ItemStoragesCreationPerformanceConfig();
+                config.disableLootContainer = true;
 
-            dropElement.tooltip.setContent(additionalContent + dropElement.tooltip.props.content);
+                // Get storages
+                var storages = new ItemStorages(drop.item, config);
+
+                // Build and set
+                const additionalContent =
+                    UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.BANK), storages.bank)
+                    + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
+                    + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COOKING_STOCKPILES), storages.cookingStockpiles);
+
+                dropElement.tooltip.setContent(additionalContent + dropElement.tooltip.props.content);
+            }
         });
-    });
+
+        // May not do anything, if the player loads in on the combat screen?
+        game.combat.loot.renderRequired = true;
+    }
 }
 
 /**
