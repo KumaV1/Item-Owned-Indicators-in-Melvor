@@ -3,11 +3,11 @@ export class Constants {
 
     static readonly TRANSLATION_KEYS = {
         DISPLAY_AREA_OPTIONS: {
-            BANK_ITEM_HOVER: '',
-            BANK_ITEM_SELECTED: '',
-            COMBAT_LOOT_CONTAINER: '',
-            COOKING_STOCKPILES: '',
-            TOWNSHIP_TRADER_CONVERSION: ''
+            BANK_ITEM_HOVER: `${Constants.MOD_NAMESPACE}_Display_Area_Option_BankItemHover`,
+            BANK_ITEM_SELECTED: `${Constants.MOD_NAMESPACE}_Display_Area_Option_BankItemSelected`,
+            COMBAT_LOOT_CONTAINER: `${Constants.MOD_NAMESPACE}_Display_Area_Option_CombatLootContainer`,
+            COOKING_STOCKPILES: `${Constants.MOD_NAMESPACE}_Display_Area_Option_CookingStockpiles`,
+            TOWNSHIP_TRADER_CONVERSION: `${Constants.MOD_NAMESPACE}_Display_Area_Option_TownshipTraderConversion`
         },
 
         CONTAINERS: {
@@ -19,15 +19,17 @@ export class Constants {
 
         SETTINGS: {
             SECTIONS: {
-                GENERAL: ''
+                DISPLAY_AREA_OPTIONS: `${Constants.MOD_NAMESPACE}_Settings_Setting_Display_Area_Options_Selected_Label`,
+                SAVE_AND_RELOAD: `${Constants.MOD_NAMESPACE}_Settings_Setting_Display_Save_Reload`,
             },
             CONFIGS: {
                 DISPLAY_AREA_OPTIONS_SELECTED: {
-                    LABEL: ''
+                    LABEL: `${Constants.MOD_NAMESPACE}_Settings_Setting_Display_Area_Options_Selected_Label`
                 },
                 RELOAD_BUTTON: {
-                    RELOAD_REQUIRED_TEXT: ''
-                }
+                    LABEL: `${Constants.MOD_NAMESPACE}_Settings_Setting_Display_Save_Reload`
+                },
+                RELOAD_HINT: `${Constants.MOD_NAMESPACE}_Settings_Hint_Save_Reload_Required`
             }
         }
     }

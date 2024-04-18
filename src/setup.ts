@@ -111,7 +111,7 @@ function patchCookingUi(ctx: Modding.ModContext) {
 }
 
 function patchTownshipUi(ctx: Modding.ModContext) {
-    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.TownshipTraderConversion)) {
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.TownshipTraderConversions)) {
         ctx.patch(TownshipConversionElement, 'getTooltip').after(function (returnValue: string, resource: TownshipResource, conversion: TownshipItemConversion): string {
             // Set up config for performance
             let config = new ItemStoragesCreationPerformanceConfig();

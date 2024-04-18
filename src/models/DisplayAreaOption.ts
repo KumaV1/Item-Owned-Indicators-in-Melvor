@@ -3,5 +3,5 @@ export enum DisplayAreaOption {
     BankItemSelected = "bankItemSelected",
     CombatLootContainer = "combatLootContainer",
     CookingStockpiles = "cookingStockpiles",
-    TownshipTraderConversion = "townshipTraderConversion"
+    TownshipTraderConversions = "townshipTraderConversion"
 }
