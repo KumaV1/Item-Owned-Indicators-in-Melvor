@@ -1,7 +1,7 @@
 # Changelog
 
 ## v1.1.0
-* Added setting to toggle areas in which to display container info
+* Added setting to toggle areas in which to display storages info
 * Added additional areas to display items storages
   * Hovering over an item in the bank
   * Sidebar when selecting an item in the bank
