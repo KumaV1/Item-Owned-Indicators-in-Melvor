@@ -38,13 +38,19 @@ function initSettings(ctx: Modding.ModContext) {
 
 function patchBankUi(ctx: Modding.ModContext) {
     if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.BankItemSelected)) {
-        ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
+        ctx.patch(BankSelectedItemMenuElement, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
             BankUiHelper.render(bankItem.item, this.selectedItemContainer);
         });
     }
 
     if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.BankItemHover)) {
-        ctx.patch(BankItemIcon, 'setItem').after(function (returnValue: void, bank: Bank, bankItem: BankItem) {
+        ctx.patch(BankItemIconElement, 'setItem').after(function (returnValue: void, bank: Bank, bankItem: BankItem) {
+            // If the game itself doesn't use a tooltip any more, the following logic would break,
+            // so just don't do anything anymore in that case
+            if (this.tooltip === undefined) {
+                return;
+            }
+
             const oldFunc = this.tooltip.props.onShow;
             this.tooltip.props.onShow = (instance: TippyTooltip) => {
                 if (this.item !== undefined) {
@@ -71,34 +77,30 @@ function patchBankUi(ctx: Modding.ModContext) {
         // At this point the bank already rendered, so we have to re-render it for the patched version to be rendered
         game.bank.itemsByTab.forEach((tab: BankItem[], tabID: Number) => {
             tab.forEach((bankItem: BankItem) => {
-                const itemIcon: BankItemIcon | undefined = bankTabMenu.itemIcons.get(bankItem.item);
+                const itemIcon: BankItemIconElement | undefined = bankTabMenu.itemIcons.get(bankItem.item);
                 if (itemIcon !== undefined) {
                     itemIcon.setItem(game.bank, bankItem);
                 }
             })
         });
-
-        //game.bank.items.forEach((value: BankItem, key))
-
-        console.log(`Bankshould have re-rendered`);
     }
 }
 
 function patchCookingUi(ctx: Modding.ModContext) {
     if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.CookingStockpiles)) {
-        ctx.patch(CookingStockpileIcon, 'getTooltipContent').after(function (returnValue: string): string {
-            if (this.item === undefined) {
-                return returnValue;
+        ctx.patch(CookingStockpileIconElement, 'setItem').after(function (returnValue: void, item: AnyItem, quantity: number) {
+            if (!this.tooltipElem.textContent) {
+                return;
             }
 
             // Get storages
-            var storages = new ItemStorages(this.item);
+            var storages = new ItemStorages(item);
 
             // Build and set
-            return UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.BANK), storages.bank)
+            this.tooltipElem.textContent = UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.BANK), storages.bank)
                 + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
                 + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer)
-                + returnValue;
+                + this.tooltipElem.textContent;
         });
     }
 }
