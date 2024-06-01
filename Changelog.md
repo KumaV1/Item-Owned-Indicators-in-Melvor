@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.2.0
+* Upcoming ItA release compatibility
+
 ## v1.1.0
 * Added setting to toggle areas in which to display storages info
 * Added additional areas to display items storages
