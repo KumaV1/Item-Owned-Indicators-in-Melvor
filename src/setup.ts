@@ -8,14 +8,21 @@ import { TranslationManager } from './managers/TranslationManager';
 import { UiHelper } from './helpers/UiHelper';
 import { SettingsManager } from './managers/SettingsManager';
 import { DisplayAreaOption } from './models/DisplayAreaOption';
+import { IoiUtils } from './utils';
 
 export async function setup(ctx: Modding.ModContext) {
     initTranslations();
     initSettings(ctx);
 
     ctx.onCharacterLoaded(function () {
-        patchBankUi(ctx);
-        patchCookingUi(ctx);
+        if (IoiUtils.buildIncludesIta()) {
+            patchBankUi(ctx);
+            patchCookingUi(ctx);
+        }
+        else {
+            preItaPatches(ctx);
+        }
+
         patchTownshipUi(ctx);
         patchCombatLootUi(ctx);
         patchRenderIndicators(ctx);
@@ -34,6 +41,83 @@ function initTranslations() {
  */
 function initSettings(ctx: Modding.ModContext) {
     SettingsManager.init(ctx);
+}
+
+/**
+ * Variants of some of the other patching methods, based on the structure before the "Into the Abyss" expansion release
+ * @param ctx
+ * @deprecated Once the expansion releases and has been live for some time, this method can be removed
+ */
+function preItaPatches(ctx: Modding.ModContext) {
+    // patchBankUi
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.BankItemSelected)) {
+        // @ts-ignore: Old class name
+        ctx.patch(BankSelectedItemMenu, 'setItem').after(function (returnValue: void, bankItem: BankItem, bank: Bank) {
+            BankUiHelper.render(bankItem.item, this.selectedItemContainer);
+        });
+    }
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.BankItemHover)) {
+        // @ts-ignore: Old class name
+        ctx.patch(BankItemIcon, 'setItem').after(function (returnValue: void, bank: Bank, bankItem: BankItem) {
+            const oldFunc = this.tooltip.props.onShow;
+            this.tooltip.props.onShow = (instance: TippyTooltip) => {
+                if (this.item !== undefined) {
+                    // Run originally defined logic first
+                    oldFunc(instance);
+
+                    // Set up config for performance
+                    let config = new ItemStoragesCreationPerformanceConfig();
+                    config.disableBank = true;
+
+                    // Get storages
+                    var storages = new ItemStorages(this.item, config);
+
+                    // Build and set
+                    const additionalContent = UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
+                        + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COOKING_STOCKPILES), storages.cookingStockpiles)
+                        + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer);
+
+                    instance.setContent(additionalContent + instance.props.content);
+                }
+            }
+        });
+
+        // At this point the bank already rendered, so we have to re-render it for the patched version to be rendered
+        game.bank.itemsByTab.forEach((tab: BankItem[], tabID: Number) => {
+            tab.forEach((bankItem: BankItem) => {
+                // @ts-ignore: Old class name
+                const itemIcon: BankItemIcon | undefined = bankTabMenu.itemIcons.get(bankItem.item);
+                if (itemIcon !== undefined) {
+                    itemIcon.setItem(game.bank, bankItem);
+                }
+            })
+        });
+    }
+
+    // patchCookingUi
+    if (SettingsManager.isAreaEnabled(ctx, DisplayAreaOption.CookingStockpiles)) {
+        // @ts-ignore: Old class name
+        ctx.patch(CookingStockpileIcon, 'getTooltipContent').after(function (returnValue: string): string {
+            if (this.item === undefined) {
+                return returnValue;
+            }
+
+            // Get storages
+            var storages = new ItemStorages(this.item);
+
+            // Build and set
+            return UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.BANK), storages.bank)
+                + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
+                + UiHelper.createBadge(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer)
+                + returnValue;
+        });
+    }
+
+    // patchTownshipUi
+
+    // patchCombatLootUi
+
+    // patchRenderIndicators
 }
 
 function patchBankUi(ctx: Modding.ModContext) {
