@@ -1,4 +1,9 @@
 export class IoiUtils {
+    public static buildIncludesIta(): boolean {
+        const _gameFileVersion = parseInt(gameFileVersion.substr(1));
+        return _gameFileVersion > 9831;
+    }
+
     /**
      * Checks whether the given element is hidden
      * @param element
