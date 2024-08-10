@@ -19,8 +19,8 @@ export class Constants {
 
         SETTINGS: {
             SECTIONS: {
-                DISPLAY_AREA_OPTIONS: `${Constants.MOD_NAMESPACE}_Settings_Setting_Display_Area_Options_Selected_Label`,
-                SAVE_AND_RELOAD: `${Constants.MOD_NAMESPACE}_Settings_Setting_Display_Save_Reload`,
+                DISPLAY_OPTIONS: `${Constants.MOD_NAMESPACE}_Settings_Section_Display_Options`,
+                SAVE_AND_RELOAD: `${Constants.MOD_NAMESPACE}_Settings_Section_Save_Reload`,
             },
             CONFIGS: {
                 DISPLAY_AREA_OPTIONS_SELECTED: {

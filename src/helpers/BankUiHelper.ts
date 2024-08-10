@@ -127,9 +127,9 @@ export class BankUiHelper {
      * @returns
      */
     private static buildStoragesInfo(storages: ItemStorages) {
-        return BankUiHelper.buildStorageInfo(getLangString('COMBAT_MISC_110'), storages.equipment)
-            + BankUiHelper.buildStorageInfo(getLangString('SKILL_NAME_Cooking'), storages.cookingStockpiles)
-            + BankUiHelper.buildStorageInfo(getLangString(`${Constants.MOD_NAMESPACE}_Storage_Name_Combat_Loot`), storages.lootContainer);
+        return BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
+            + BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COOKING_STOCKPILES), storages.cookingStockpiles)
+            + BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer);
     }
 
     /**

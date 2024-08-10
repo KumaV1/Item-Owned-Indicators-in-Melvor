@@ -12,9 +12,12 @@
     // ##### Other
     Bank_Selected_Item_Section_Title: "Other storages",
 
-    // ##### Save & Reload button
+    // ##### Settings
+    Settings_Section_Display_Options: 'Display options',
+
     Settings_Setting_Display_Area_Options_Selected_Label: 'Display area options',
 
     Settings_Hint_Save_Reload_Required: 'Reload required',
+    Settings_Section_Save_Reload: 'Save all & Reload',
     Settings_Setting_Display_Save_Reload: 'Save all & Reload'
 };
