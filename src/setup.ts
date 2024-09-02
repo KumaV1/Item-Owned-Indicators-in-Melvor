@@ -257,42 +257,61 @@ function patchCombatLootUi(ctx: Modding.ModContext) {
  * but may not cause the loot container to re-render
  */
 function patchRenderIndicators(ctx: Modding.ModContext) {
+    // On adding/removing loot from loot container
+    ctx.patch(CombatLoot, 'add').after(function () {
+        ensureBankRerender();
+    });
+    ctx.patch(CombatLoot, 'lootAll').after(function () {
+        ensureBankRerender();
+    });
+    ctx.patch(CombatLoot, 'lootItem').after(function () {
+        ensureBankRerender();
+    });
+
     // On adding/removing items from the bank in any way
     ctx.patch(Bank, 'addItem').after(function () {
-        ensureRerenders();
+        ensureAllRerenders();
     });
     ctx.patch(Bank, 'removeItemQuantity').after(function () {
-        ensureRerenders();
+        ensureAllRerenders();
     });
 
     // On any changes to equipment/food (some would technically be handled by Bank changes, but better be safe than sorry)
     ctx.patch(Equipment, 'equipItem').after(function () {
-        ensureRerenders();
+        ensureAllRerenders();
     });
     ctx.patch(Equipment, 'unequipItem').after(function () {
-        ensureRerenders();
+        ensureAllRerenders();
     });
 
     ctx.patch(EquippedFood, 'equip').after(function () {
-        ensureRerenders();
+        ensureAllRerenders();
     });
     ctx.patch(EquippedFood, 'unequipSelected').after(function () {
-        ensureRerenders();
+        ensureAllRerenders();
     });
     ctx.patch(EquippedFood, 'consume').after(function () {
-        ensureRerenders();
+        ensureAllRerenders();
     });
 
     // On passive cooking action (claiming stockpile adds to bank and is therefore already handled by above patch)
     ctx.patch(Cooking, 'passiveCookingAction').after(function () {
-        ensureRerenders();
+        ensureAllRerenders();
     });
+}
+
+function ensureBankRerender() {
+    BankUiHelper.rerenderSelectedItemContainerIfRequired();
+}
+
+function ensureCombatLootRerender() {
+    game.combat.loot.renderRequired = true;
 }
 
 /**
  * Goes through all indicators, to make sure that re-renders are made, if necessary
  */
-function ensureRerenders() {
-    game.combat.loot.renderRequired = true;
-    BankUiHelper.rerenderSelectedItemContainerIfRequired();
+function ensureAllRerenders() {
+    ensureBankRerender();
+    ensureCombatLootRerender();
 }

@@ -1,4 +1,5 @@
 import { Constants } from "../Constants";
+import { BankStorageSectionElement } from "../models/BankStorageSectionElement";
 import { ItemStorages } from "../models/ItemStorages";
 import { ItemStoragesCreationPerformanceConfig } from "../models/ItemStoragesCreationPerformanceConfig";
 import { IoiUtils } from "../utils";
@@ -11,7 +12,9 @@ export class BankUiHelper {
     private static _bankItemBoxContainer: HTMLElement | null;
 
     /** The container with the information about storages */
-    private static _storagesSectionContainer: HTMLDivElement | undefined;
+    //private static _storagesSectionContainer: HTMLDivElement | undefined;
+
+    private static _sectionElement: BankStorageSectionElement | undefined;
 
     /**
      * Process rendering the storages section in the bank's selected item info
@@ -21,14 +24,19 @@ export class BankUiHelper {
      */
     public static render(item: AnyItem, parentContainer: HTMLDivElement): void {
         // Initialize / Preserve containers, if they haven't been already
-        if (BankUiHelper._storagesSectionContainer === undefined) {
-            // Create element
-            BankUiHelper._storagesSectionContainer = createElement('div', {
-                id: 'item-owned-indicators__bank-ui-storages-section',
-                classList: ['col-12', 'item-owned-indicators__bank-ui-storages-section'],
-                parent: parentContainer
-            });
+        //if (BankUiHelper._storagesSectionContainer === undefined) {
+        //    // Create element
+        //    BankUiHelper._storagesSectionContainer = createElement('div', {
+        //        id: 'item-owned-indicators__bank-ui-storages-section',
+        //        classList: ['col-12', 'item-owned-indicators__bank-ui-storages-section'],
+        //        parent: parentContainer
+        //    });
+        //}
+
+        if (BankUiHelper._sectionElement === undefined) {
+            BankUiHelper._sectionElement = new BankStorageSectionElement(parentContainer);
         }
+
         if (!BankUiHelper._bankItemBoxContainer) {
             BankUiHelper._bankItemBoxContainer = document.getElementById('bank-item-box');
         }
@@ -42,35 +50,40 @@ export class BankUiHelper {
      * @returns
      */
     private static renderInternal(item: AnyItem): void {
-        if (!BankUiHelper._storagesSectionContainer) {
+        if (this._sectionElement === undefined) {
             return;
         }
 
+        //if (!BankUiHelper._storagesSectionContainer) {
+        //    return;
+        //}
+
         // Set up config for performance
-        let config = new ItemStoragesCreationPerformanceConfig();
-        config.disableBank = true;
+        //let config = new ItemStoragesCreationPerformanceConfig();
+        //config.disableBank = true;
 
-        // Get storages
-        const storages = new ItemStorages(item);
+        //// Get storages
+        //const storages = new ItemStorages(item);
 
-        // Run how to render container
-        if (BankUiHelper.showSection(storages)) {
-            // Set content of container
-            BankUiHelper._storagesSectionContainer.innerHTML = `<div class="block block-rounded-double bg-combat-inner-dark">
-                       <div class="block-header block-header-default bg-dark-bank-block-header px-3 py-1">
-                           <h5 class="font-size-sm font-w600 mb-0">${getLangString(`${Constants.MOD_NAMESPACE}_Bank_Selected_Item_Section_Title`)}</h5>
-                       </div>
-                       <div class="col-12">
-                           ${BankUiHelper.buildStoragesInfo(storages)}
-                       </div>
-                   </div>`;
+        //// Run how to render container
+        //if (BankUiHelper.showSection(storages)) {
+        //    // Set content of container
+        //    BankUiHelper._storagesSectionContainer.innerHTML = `<div class="block block-rounded-double bg-combat-inner-dark">
+        //               <div class="block-header block-header-default bg-dark-bank-block-header px-3 py-1">
+        //                   <h5 class="font-size-sm font-w600 mb-0">${getLangString(`${Constants.MOD_NAMESPACE}_Bank_Selected_Item_Section_Title`)}</h5>
+        //               </div>
+        //               <div class="col-12">
+        //                   ${BankUiHelper.buildStoragesInfo(storages)}
+        //               </div>
+        //           </div>`;
 
-            // Show container
-            showElement(BankUiHelper._storagesSectionContainer);
-        } else {
-            hideElement(BankUiHelper._storagesSectionContainer);
-        }
+        //    // Show container
+        //    showElement(BankUiHelper._storagesSectionContainer);
+        //} else {
+        //    hideElement(BankUiHelper._storagesSectionContainer);
+        //}
 
+        this._sectionElement.setItem(item);
         BankUiHelper.evaluateCustomElementHeights();
     }
 
@@ -106,44 +119,45 @@ export class BankUiHelper {
 
         // Otherwise, rerender
         // NOTE: only calling`renderInternal`(only rerendering the new container) resulted in certain height changes not being picked up properly by what the method currently does
-        bankSideBarMenu.selectedMenu.setItem(game.bank.selectedBankItem, game.bank);
+        //bankSideBarMenu.selectedMenu.setItem(game.bank.selectedBankItem, game.bank);
+        this._sectionElement?.setItem(game.bank.selectedBankItem.item);
         return;
     }
 
-    /**
-     * Whether or not the section should be displayed
-     * @param storages
-     * @returns
-     */
-    private static showSection(storages: ItemStorages) {
-        return storages.equipment > 0
-            || storages.cookingStockpiles > 0
-            || storages.lootContainer > 0;
-    }
+    ///**
+    // * Whether or not the section should be displayed
+    // * @param storages
+    // * @returns
+    // */
+    //private static showSection(storages: ItemStorages) {
+    //    return storages.equipment > 0
+    //        || storages.cookingStockpiles > 0
+    //        || storages.lootContainer > 0;
+    //}
 
-    /**
-     * Build html for the storage informations inside the section
-     * @param storages info about all (relevant) storages
-     * @returns
-     */
-    private static buildStoragesInfo(storages: ItemStorages) {
-        return BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
-            + BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COOKING_STOCKPILES), storages.cookingStockpiles)
-            + BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer);
-    }
+    ///**
+    // * Build html for the storage informations inside the section
+    // * @param storages info about all (relevant) storages
+    // * @returns
+    // */
+    //private static buildStoragesInfo(storages: ItemStorages) {
+    //    return BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.EQUIPMENT), storages.equipment)
+    //        + BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COOKING_STOCKPILES), storages.cookingStockpiles)
+    //        + BankUiHelper.buildStorageInfo(getLangString(Constants.TRANSLATION_KEYS.CONTAINERS.COMBAT_LOOT_CONTAINER), storages.lootContainer);
+    //}
 
-    /**
-     * Build html for a specific storage inside the section
-     * @param name name of the storage
-     * @param qty quantity in the storage
-     */
-    private static buildStorageInfo(name: string, qty: number): string {
-        if (qty === 0) {
-            return '';
-        }
+    ///**
+    // * Build html for a specific storage inside the section
+    // * @param name name of the storage
+    // * @param qty quantity in the storage
+    // */
+    //private static buildStorageInfo(name: string, qty: number): string {
+    //    if (qty === 0) {
+    //        return '';
+    //    }
 
-        return `<div class="mt-2 mb-2">
-          <span class="mr-1 item-owned-indicators__bank-ui-storages-section-storage-name">${name}:</span><span class="class="item-owned-indicators__bank-ui-storages-section-storage-amount">${formatNumber(qty)}<span></span>
-        </div>`
-    }
+    //    return `<div class="mt-2 mb-2">
+    //      <span class="mr-1 item-owned-indicators__bank-ui-storages-section-storage-name">${name}:</span><span class="class="item-owned-indicators__bank-ui-storages-section-storage-amount">${formatNumber(qty)}<span></span>
+    //    </div>`
+    //}
 }
