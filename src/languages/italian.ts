@@ -12,9 +12,12 @@
     // ##### Other
     Bank_Selected_Item_Section_Title: "Altri magazzini",
 
-    // ##### Save & Reload button
+    // ##### Settings
+    Settings_Section_Display_Options: 'Opzioni di visualizzazione',
+
     Settings_Setting_Display_Area_Options_Selected_Label: "Opzioni dell'area di visualizzazione",
 
     Settings_Hint_Save_Reload_Required: 'Richiede una ricarica',
+    Settings_Section_Save_Reload: 'Richiede una ricarica',
     Settings_Setting_Display_Save_Reload: 'Salvare tutto e ricaricare'
 };

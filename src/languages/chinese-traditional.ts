@@ -12,9 +12,12 @@
     // ##### Other
     Bank_Selected_Item_Section_Title: "其他儲存",
 
-    // ##### Save & Reload button
+    // ##### Settings
+    Settings_Section_Display_Options: '顯示選項',
+
     Settings_Setting_Display_Area_Options_Selected_Label: '顯示區域選項',
 
     Settings_Hint_Save_Reload_Required: '需要重新加載',
+    Settings_Section_Save_Reload: '需要重新加載',
     Settings_Setting_Display_Save_Reload: '全部保存並重新加載'
 };

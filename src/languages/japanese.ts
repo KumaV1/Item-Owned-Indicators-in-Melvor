@@ -12,9 +12,12 @@
     // ##### Other
     Bank_Selected_Item_Section_Title: "その他の倉庫",
 
-    // ##### Save & Reload button
+    // ##### Settings
+    Settings_Section_Display_Options: '表示オプション',
+
     Settings_Setting_Display_Area_Options_Selected_Label: '表示領域のオプション',
 
     Settings_Hint_Save_Reload_Required: 'リロードが必要',
+    Settings_Section_Save_Reload: 'リロードが必要',
     Settings_Setting_Display_Save_Reload: 'すべて保存してリロード'
 };

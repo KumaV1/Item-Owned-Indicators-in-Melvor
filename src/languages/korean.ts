@@ -12,9 +12,12 @@
     // ##### Other
     Bank_Selected_Item_Section_Title: "기타 저장소",
 
-    // ##### Save & Reload button
+    // ##### Settings
+    Settings_Section_Display_Options: '디스플레이 옵션',
+
     Settings_Setting_Display_Area_Options_Selected_Label: '표시 영역 옵션',
 
     Settings_Hint_Save_Reload_Required: '재장전 필요',
+    Settings_Section_Save_Reload: '재장전 필요',
     Settings_Setting_Display_Save_Reload: '모두 저장 및 다시 로드'
 };

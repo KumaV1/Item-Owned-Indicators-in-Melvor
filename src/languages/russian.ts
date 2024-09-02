@@ -12,9 +12,12 @@
     // ##### Other
     Bank_Selected_Item_Section_Title: "Другие хранилища",
 
-    // ##### Save & Reload button
+    // ##### Settings
+    Settings_Section_Display_Options: 'Параметры отображения',
+
     Settings_Setting_Display_Area_Options_Selected_Label: 'Параметры области отображения',
 
     Settings_Hint_Save_Reload_Required: 'Требуется перезагрузка',
+    Settings_Section_Save_Reload: 'Требуется перезагрузка',
     Settings_Setting_Display_Save_Reload: 'Сохранить все и перезагрузить'
 };

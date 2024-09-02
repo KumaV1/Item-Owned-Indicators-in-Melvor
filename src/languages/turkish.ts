@@ -12,9 +12,12 @@
     // ##### Other
     Bank_Selected_Item_Section_Title: "Diğer depolar",
 
-    // ##### Save & Reload button
+    // ##### Settings
+    Settings_Section_Display_Options: 'Görüntüleme seçenekleri',
+
     Settings_Setting_Display_Area_Options_Selected_Label: 'Ekran alanı seçenekleri',
 
     Settings_Hint_Save_Reload_Required: 'Yeniden yükleme gerekli',
+    Settings_Section_Save_Reload: 'Yeniden yükleme gerekli',
     Settings_Setting_Display_Save_Reload: 'Tümünü Kaydet ve Yeniden Yükle'
 };

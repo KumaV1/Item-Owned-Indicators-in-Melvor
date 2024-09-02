@@ -12,9 +12,12 @@
     // ##### Other
     Bank_Selected_Item_Section_Title: "Outros armazenamentos",
 
-    // ##### Save & Reload button
+    // ##### Settings
+    Settings_Section_Display_Options: 'Opções de exibição',
+
     Settings_Setting_Display_Area_Options_Selected_Label: 'Opções da área de exibição',
 
     Settings_Hint_Save_Reload_Required: 'Recarga necessária',
+    Settings_Section_Save_Reload: 'Recarga necessária',
     Settings_Setting_Display_Save_Reload: 'Salvar tudo e recarregar'
 };
