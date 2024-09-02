@@ -45,7 +45,7 @@ export class BankUiHelper {
         }
 
         // Otherwise, rerender
-        this._sectionElement?.setItem(game.bank.selectedBankItem.item);
+        this._sectionElement.setItem(game.bank.selectedBankItem.item);
         return;
     }
 }
