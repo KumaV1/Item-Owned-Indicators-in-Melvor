@@ -13,7 +13,7 @@
     Bank_Selected_Item_Section_Title: "Autres stockages",
 
     // ##### Settings
-    Settings_Section_Display_Options: 'Options d'affichage',
+    Settings_Section_Display_Options: "Options d'affichage",
 
     Settings_Setting_Display_Area_Options_Selected_Label: "Options de la zone d'affichage",
 
