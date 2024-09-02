@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.1
+* When re-rendering the bank item sidebar, will now only re-render the container section, rather than the entire menu
+* Removed sidebar height check, that seems to have become redundant after the Game's v1.3 release
+
 ## v1.2.0
 * Upcoming ItA release compatibility
 
