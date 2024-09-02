@@ -4,7 +4,7 @@ import { DisplayAreaOption } from "../models/DisplayAreaOption";
 export class SettingsManager {
     public static init(ctx: Modding.ModContext) {
         // Select areas to display info
-        ctx.settings.section(getLangString(Constants.TRANSLATION_KEYS.SETTINGS.SECTIONS.DISPLAY_AREA_OPTIONS)).add([
+        ctx.settings.section(getLangString(Constants.TRANSLATION_KEYS.SETTINGS.SECTIONS.DISPLAY_OPTIONS)).add([
             {
                 type: 'checkbox-group',
                 name: 'display-area-options-selected',
@@ -91,7 +91,7 @@ export class SettingsManager {
      */
     public static isAreaEnabled(ctx: Modding.ModContext, option: DisplayAreaOption) {
         const areas = ctx.settings
-            .section(getLangString(Constants.TRANSLATION_KEYS.SETTINGS.SECTIONS.DISPLAY_AREA_OPTIONS))
+            .section(getLangString(Constants.TRANSLATION_KEYS.SETTINGS.SECTIONS.DISPLAY_OPTIONS))
             .get('display-area-options-selected') as DisplayAreaOption[] ?? [];
 
         return areas.some(a => a === option);

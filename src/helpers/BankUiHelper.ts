@@ -29,6 +29,11 @@ export class BankUiHelper {
      * @returns
      */
     public static rerenderSelectedItemSidebarContainerIfRequired(): void {
+        // No element initialized (setting disabled)
+        if (this._sectionElement === undefined) {
+            return;
+        }
+
         // No item currently selected
         if (!game.bank.selectedBankItem) {
             return;

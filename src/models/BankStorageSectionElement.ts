@@ -85,12 +85,12 @@ export class BankStorageSectionElement {
      * @param qty quantity in the storage
      */
     private buildStorageInfo(name: string, qty: number): string {
-        if (qty === 0) {
+        if (qty <= 0) {
             return '';
         }
 
         return `<div class="mt-2 mb-2">
-          <span class="mr-1 item-owned-indicators__bank-ui-storages-section-storage-name">${name}:</span><span class="class="item-owned-indicators__bank-ui-storages-section-storage-amount">${formatNumber(qty)}<span></span>
+          <span class="mr-1 item-owned-indicators__bank-ui-storages-section-storage-name">${name}:</span><span class="item-owned-indicators__bank-ui-storages-section-storage-amount">${formatNumber(qty)}<span></span>
         </div>`
     }
 }
